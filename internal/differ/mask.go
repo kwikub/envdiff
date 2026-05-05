@@ -1,22 +1,26 @@
 package differ
 
-import "strings"
+import (
+	"strings"
 
-// secretPatterns contains substrings that indicate a key holds a secret value.
+	"github.com/user/envdiff/internal/parser"
+)
+
+// secretPatterns holds substrings that indicate a key likely holds a secret value.
 var secretPatterns = []string{
 	"SECRET",
 	"PASSWORD",
 	"PASSWD",
 	"TOKEN",
 	"API_KEY",
-	"PRIVATE_KEY",
-	"CREDENTIALS",
+	"PRIVATE",
+	"ACCESS_KEY",
 	"AUTH",
+	"CREDENTIAL",
 }
 
-const maskedValue = "***"
-
-// IsSecret reports whether the given key name looks like it holds a secret.
+// IsSecret reports whether the given environment variable key is likely
+// to contain a sensitive / secret value based on common naming patterns.
 func IsSecret(key string) bool {
 	upper := strings.ToUpper(key)
 	for _, pattern := range secretPatterns {
@@ -27,20 +31,15 @@ func IsSecret(key string) bool {
 	return false
 }
 
-// MaskSecrets returns a copy of the diff entries with secret values replaced
-// by the masked placeholder.
-func MaskSecrets(entries []DiffEntry) []DiffEntry {
-	out := make([]DiffEntry, len(entries))
+// MaskSecrets returns a copy of the provided entries with secret values
+// replaced by "***". The original slice is not modified.
+func MaskSecrets(entries []parser.Entry) []parser.Entry {
+	result := make([]parser.Entry, len(entries))
 	for i, e := range entries {
 		if IsSecret(e.Key) {
-			if e.BaseVal != "" {
-				e.BaseVal = maskedValue
-			}
-			if e.OtherVal != "" {
-				e.OtherVal = maskedValue
-			}
+			e.Value = "***"
 		}
-		out[i] = e
+		result[i] = e
 	}
-	return out
+	return result
 }
