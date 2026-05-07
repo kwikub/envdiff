@@ -82,3 +82,15 @@ func Lint(path string) ([]Finding, error) {
 
 	return findings, nil
 }
+
+// HasErrors reports whether any of the provided findings have SeverityError.
+// This is useful for callers that need to decide whether to treat lint results
+// as a hard failure (e.g. in CI pipelines).
+func HasErrors(findings []Finding) bool {
+	for _, f := range findings {
+		if f.Severity == SeverityError {
+			return true
+		}
+	}
+	return false
+}
