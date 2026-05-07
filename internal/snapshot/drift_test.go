@@ -75,3 +75,15 @@ func TestDriftResult_DiffsAccessible(t *testing.T) {
 		}
 	}
 }
+
+func TestDetectDrift_NilSnapshot(t *testing.T) {
+	entries := []parser.Entry{{Key: "A", Value: "1"}}
+	_, err := snapshot.DetectDrift(nil, makeSnap(entries))
+	if err == nil {
+		t.Error("expected error when baseline snapshot is nil")
+	}
+	_, err = snapshot.DetectDrift(makeSnap(entries), nil)
+	if err == nil {
+		t.Error("expected error when current snapshot is nil")
+	}
+}
