@@ -69,6 +69,32 @@ func TestDiff_EmptyFiles(t *testing.T) {
 	}
 }
 
+// TestDiff_MultipleChanges verifies that a diff with added, removed, and
+// modified keys all present in the same result is handled correctly.
+func TestDiff_MultipleChanges(t *testing.T) {
+	base := entries("HOST", "localhost", "PORT", "8080", "DEBUG", "true")
+	other := entries("HOST", "prod.example.com", "DEBUG", "true", "TIMEOUT", "30")
+
+	result := differ.Diff(base, other)
+
+	cases := []struct {
+		key      string
+		wantType differ.DiffType
+	}{
+		{"HOST", differ.Modified},
+		{"PORT", differ.Removed},
+		{"DEBUG", differ.Unchanged},
+		{"TIMEOUT", differ.Added},
+	}
+
+	for _, tc := range cases {
+		found := findByKey(result, tc.key)
+		if found == nil || found.Type != tc.wantType {
+			t.Errorf("key %q: expected %v, got %+v", tc.key, tc.wantType, found)
+		}
+	}
+}
+
 func findByKey(entries []differ.DiffEntry, key string) *differ.DiffEntry {
 	for i := range entries {
 		if entries[i].Key == key {
