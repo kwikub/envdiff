@@ -43,3 +43,15 @@ func MaskSecrets(entries []parser.Entry) []parser.Entry {
 	}
 	return result
 }
+
+// FilterSecrets returns only the entries whose keys are considered secret.
+// This is useful for auditing which variables in a file contain sensitive data.
+func FilterSecrets(entries []parser.Entry) []parser.Entry {
+	var result []parser.Entry
+	for _, e := range entries {
+		if IsSecret(e.Key) {
+			result = append(result, e)
+		}
+	}
+	return result
+}
