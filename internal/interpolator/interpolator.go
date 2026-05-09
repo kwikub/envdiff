@@ -68,7 +68,7 @@ func resolve(value string, lookup map[string]string, opts Options) (string, erro
 			}
 		}
 		if opts.Strict {
-			resolveErr = fmt.Errorf("unresolved reference: %s", strings.TrimLeft(match, "${"))
+			resolveErr = fmt.Errorf("unresolved reference: %s", match)
 			return match
 		}
 		return match
@@ -81,4 +81,11 @@ func extractKey(match string) string {
 	match = strings.TrimSuffix(match, "}")
 	match = strings.TrimPrefix(match, "$")
 	return match
+}
+
+// ResolveOne resolves variable references in a single value string using the
+// provided lookup map and options. It is useful when interpolating an
+// individual value outside of a full entry slice.
+func ResolveOne(value string, lookup map[string]string, opts Options) (string, error) {
+	return resolve(value, lookup, opts)
 }
