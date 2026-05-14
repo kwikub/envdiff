@@ -21,6 +21,11 @@ const (
 	FormatJSON   Format = "json"
 )
 
+// ValidFormats returns all supported export formats.
+func ValidFormats() []Format {
+	return []Format{FormatEnv, FormatShell, FormatDocker, FormatJSON}
+}
+
 // Export writes entries to w in the specified format.
 func Export(entries []parser.Entry, format Format, w io.Writer) error {
 	switch format {
@@ -33,8 +38,19 @@ func Export(entries []parser.Entry, format Format, w io.Writer) error {
 	case FormatJSON:
 		return exportJSON(entries, w)
 	default:
-		return fmt.Errorf("unsupported export format: %s", format)
+		return fmt.Errorf("unsupported export format %q, valid formats: %s",
+			format, formatList())
 	}
+}
+
+// formatList returns a comma-separated string of valid format names for use in error messages.
+func formatList() string {
+	formats := ValidFormats()
+	names := make([]string, len(formats))
+	for i, f := range formats {
+		names[i] = string(f)
+	}
+	return strings.Join(names, ", ")
 }
 
 func exportEnv(entries []parser.Entry, w io.Writer) error {
