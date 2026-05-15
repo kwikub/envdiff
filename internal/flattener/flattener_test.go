@@ -74,6 +74,16 @@ func TestFlatten_StrategyError_ReturnsDuplicateKeyError(t *testing.T) {
 	}
 }
 
+func TestFlatten_StrategyError_NoDuplicates_ReturnsNoError(t *testing.T) {
+	_, err := flattener.Flatten(flattener.StrategyError,
+		entries("A", "1"),
+		entries("B", "2"),
+	)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+}
+
 func TestFlatten_PreservesOrderOfFirstSeen(t *testing.T) {
 	result, err := flattener.Flatten(flattener.StrategyFirst,
 		entries("C", "3", "A", "1"),
