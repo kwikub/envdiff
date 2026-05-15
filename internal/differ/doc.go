@@ -1,13 +1,12 @@
-// Package differ provides utilities for computing differences between two sets
-// of .env entries.
+// Package differ provides utilities for comparing two sets of .env entries.
 //
-// The Diff function returns a list of DiffResult values describing keys that
-// were added, removed, modified, or unchanged between a base and target file.
+// Diff returns a list of DiffEntry values describing keys that were added,
+// removed, modified, or unchanged between a base and a target environment.
 //
-// The Compare function performs a side-by-side comparison of two entry slices,
-// returning a CompareResult for every key found in either side, annotated with
-// a status of "match", "mismatch", "left_only", or "right_only".
+// Compare performs a symmetric key-by-key comparison and reports the status
+// of every key seen in either input, making it suitable for side-by-side
+// inspection of two arbitrary env files.
 //
-// Secret masking helpers are provided via MaskSecrets and IsSecret to prevent
-// sensitive values from appearing in diff output.
+// MaskSecrets and FilterSecrets help redact sensitive values before the
+// diff results are displayed or written to logs.
 package differ

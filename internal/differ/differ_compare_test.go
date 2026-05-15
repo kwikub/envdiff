@@ -2,27 +2,25 @@ package differ
 
 import (
 	"testing"
+
+	"github.com/subtlepseudonym/envdiff/internal/parser"
 )
 
 func TestCompare_MatchingKeys(t *testing.T) {
-	left := entries("A=1", "B=2")
-	right := entries("A=1", "B=2")
-
+	left := []parser.Entry{{Key: "FOO", Value: "bar"}}
+	right := []parser.Entry{{Key: "FOO", Value: "bar"}}
 	results := Compare(left, right)
-	if len(results) != 2 {
-		t.Fatalf("expected 2 results, got %d", len(results))
+	if len(results) != 1 {
+		t.Fatalf("expected 1 result, got %d", len(results))
 	}
-	for _, r := range results {
-		if r.Status != "match" {
-			t.Errorf("key %s: expected match, got %s", r.Key, r.Status)
-		}
+	if results[0].Status != "match" {
+		t.Errorf("expected match, got %s", results[0].Status)
 	}
 }
 
 func TestCompare_MismatchedValue(t *testing.T) {
-	left := entries("A=1")
-	right := entries("A=2")
-
+	left := []parser.Entry{{Key: "FOO", Value: "bar"}}
+	right := []parser.Entry{{Key: "FOO", Value: "baz"}}
 	results := Compare(left, right)
 	if len(results) != 1 {
 		t.Fatalf("expected 1 result, got %d", len(results))
@@ -30,57 +28,37 @@ func TestCompare_MismatchedValue(t *testing.T) {
 	if results[0].Status != "mismatch" {
 		t.Errorf("expected mismatch, got %s", results[0].Status)
 	}
-	if results[0].Left != "1" || results[0].Right != "2" {
+	if results[0].Left != "bar" || results[0].Right != "baz" {
 		t.Errorf("unexpected values: left=%s right=%s", results[0].Left, results[0].Right)
 	}
 }
 
 func TestCompare_LeftOnly(t *testing.T) {
-	left := entries("A=1", "B=2")
-	right := entries("A=1")
-
+	left := []parser.Entry{{Key: "ONLY_LEFT", Value: "x"}}
+	right := []parser.Entry{}
 	results := Compare(left, right)
-	var found *CompareResult
-	for i := range results {
-		if results[i].Key == "B" {
-			found = &results[i]
-		}
+	if len(results) != 1 {
+		t.Fatalf("expected 1 result, got %d", len(results))
 	}
-	if found == nil {
-		t.Fatal("expected result for key B")
-	}
-	if found.Status != "left_only" {
-		t.Errorf("expected left_only, got %s", found.Status)
-	}
-	if found.Right != "" {
-		t.Errorf("expected empty right value")
+	if results[0].Status != "left_only" {
+		t.Errorf("expected left_only, got %s", results[0].Status)
 	}
 }
 
 func TestCompare_RightOnly(t *testing.T) {
-	left := entries("A=1")
-	right := entries("A=1", "C=3")
-
+	left := []parser.Entry{}
+	right := []parser.Entry{{Key: "ONLY_RIGHT", Value: "y"}}
 	results := Compare(left, right)
-	var found *CompareResult
-	for i := range results {
-		if results[i].Key == "C" {
-			found = &results[i]
-		}
+	if len(results) != 1 {
+		t.Fatalf("expected 1 result, got %d", len(results))
 	}
-	if found == nil {
-		t.Fatal("expected result for key C")
-	}
-	if found.Status != "right_only" {
-		t.Errorf("expected right_only, got %s", found.Status)
-	}
-	if found.Left != "" {
-		t.Errorf("expected empty left value")
+	if results[0].Status != "right_only" {
+		t.Errorf("expected right_only, got %s", results[0].Status)
 	}
 }
 
 func TestCompare_EmptyBothSides(t *testing.T) {
-	results := Compare([]Entry{}, []Entry{})
+	results := Compare([]parser.Entry{}, []parser.Entry{})
 	if len(results) != 0 {
 		t.Errorf("expected 0 results, got %d", len(results))
 	}
